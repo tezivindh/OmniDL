@@ -1,4 +1,5 @@
 import 'package:omnidl/features/downloader/data/plugins/http_download_plugin.dart';
+import 'package:omnidl/features/downloader/data/plugins/youtube_download_plugin.dart';
 import 'package:omnidl/features/downloader/domain/download_plugin.dart';
 
 class DownloaderPluginRegistry {
@@ -6,7 +7,8 @@ class DownloaderPluginRegistry {
   static final DownloaderPluginRegistry instance = DownloaderPluginRegistry._();
 
   final List<DownloadPlugin> _plugins = [
-    HttpDownloadPlugin(), // Register default HTTP plugin
+    YoutubeDownloadPlugin(), // Register YouTube plugin
+    HttpDownloadPlugin(),    // Register default HTTP plugin
   ];
 
   /// Find a plugin that can handle the given URL.

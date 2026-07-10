@@ -1,13 +1,18 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:omnidl/features/downloader/presentation/providers/download_providers.dart';
+import 'package:omnidl/features/downloader/presentation/widgets/download_item_widget.dart';
+import 'package:path_provider/path_provider.dart';
 
-class HomeView extends StatefulWidget {
+class HomeView extends ConsumerStatefulWidget {
   const HomeView({super.key});
 
   @override
-  State<HomeView> createState() => _HomeViewState();
+  ConsumerState<HomeView> createState() => _HomeViewState();
 }
 
-class _HomeViewState extends State<HomeView> {
+class _HomeViewState extends ConsumerState<HomeView> {
   final TextEditingController _urlController = TextEditingController();
 
   @override
@@ -16,7 +21,7 @@ class _HomeViewState extends State<HomeView> {
     super.dispose();
   }
 
-  void _handleDownload() {
+  Future<void> _handleDownload() async {
     final url = _urlController.text.trim();
     if (url.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -28,33 +33,45 @@ class _HomeViewState extends State<HomeView> {
       return;
     }
     
-    // For now, show a info dialog
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.download, color: Colors.indigo),
-            SizedBox(width: 8),
-            Text('Start Download'),
-          ],
-        ),
-        content: Text('Downloading from URL:\n\n$url\n\nThe download engine is being set up in the next feature phase!'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+    try {
+      Directory? dir;
+      if (Platform.isAndroid || Platform.isIOS) {
+        dir = await getApplicationDocumentsDirectory();
+      } else {
+        dir = await getDownloadsDirectory() ?? await getApplicationDocumentsDirectory();
+      }
+      
+      final saveDir = dir.path;
+      
+      // Enqueue download via engine
+      await ref.read(downloadEngineProvider).enqueue(url, saveDir);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Added to download queue'),
+            duration: Duration(seconds: 2),
           ),
-        ],
-      ),
-    );
-    _urlController.clear();
+        );
+      }
+      _urlController.clear();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to start download: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final downloadsAsync = ref.watch(downloadListProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -92,7 +109,7 @@ class _HomeViewState extends State<HomeView> {
                         'Universal Media Downloader & Player',
                         style: TextStyle(
                           fontSize: 15,
-                          color: colorScheme.onBackground.withOpacity(0.6),
+                          color: colorScheme.onSurface.withOpacity(0.6),
                         ),
                       ),
                     ],
@@ -172,7 +189,7 @@ class _HomeViewState extends State<HomeView> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: colorScheme.onBackground.withOpacity(0.8),
+                  color: colorScheme.onSurface.withOpacity(0.8),
                 ),
               ),
               const SizedBox(height: 12),
@@ -194,26 +211,47 @@ class _HomeViewState extends State<HomeView> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: colorScheme.onBackground.withOpacity(0.8),
+                  color: colorScheme.onSurface.withOpacity(0.8),
                 ),
               ),
               const SizedBox(height: 12),
-              _buildMockDownloadItem(
-                context,
-                title: 'Introduction to Flutter Clean Architecture.mp4',
-                source: 'youtube.com',
-                size: '24.5 MB',
-                progress: 1.0,
-                isCompleted: true,
-              ),
-              const SizedBox(height: 10),
-              _buildMockDownloadItem(
-                context,
-                title: 'Lo-Fi Chill Beats Mix for Coding.mp3',
-                source: 'soundcloud.com',
-                size: '48.1 MB',
-                progress: 0.72,
-                isCompleted: false,
+              downloadsAsync.when(
+                data: (tasks) {
+                  if (tasks.isEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      child: Center(
+                        child: Text(
+                          'No recent downloads',
+                          style: TextStyle(
+                            color: colorScheme.onSurface.withOpacity(0.5),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                  return Column(
+                    children: tasks
+                        .take(3)
+                        .map((task) => DownloadItemWidget(task: task))
+                        .toList(),
+                  );
+                },
+                loading: () => const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+                error: (err, stack) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Center(
+                    child: Text(
+                      'Failed to load downloads: $err',
+                      style: TextStyle(color: colorScheme.error),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
@@ -248,97 +286,6 @@ class _HomeViewState extends State<HomeView> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildMockDownloadItem(
-    BuildContext context, {
-    required String title,
-    required String source,
-    required String size,
-    required double progress,
-    required bool isCompleted,
-  }) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Card(
-      margin: EdgeInsets.zero,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: isCompleted
-                    ? colorScheme.primaryContainer
-                    : colorScheme.secondaryContainer,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(
-                isCompleted ? Icons.check_circle : Icons.downloading,
-                color: isCompleted ? colorScheme.primary : colorScheme.secondary,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Text(
-                        source,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: colorScheme.onSurface.withOpacity(0.6),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '•',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: colorScheme.onSurface.withOpacity(0.4),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        size,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: colorScheme.onSurface.withOpacity(0.6),
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (!isCompleted) ...[
-                    const SizedBox(height: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: progress,
-                        minHeight: 4,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

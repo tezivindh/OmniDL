@@ -19,6 +19,9 @@ class DownloadTaskModel {
 
   String? errorMessage;
   
+  String? selectedQualityId;
+  String? selectedQualityLabel;
+  
   late DateTime createdAt;
 }
 

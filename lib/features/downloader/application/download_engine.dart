@@ -17,7 +17,11 @@ class DownloadEngine {
 
   final Map<int, StreamSubscription<DownloadStatusUpdate>> _activeSubscriptions = {};
 
-  Future<void> enqueue(String url, String saveDirectory) async {
+  Future<void> enqueue(
+    String url,
+    String saveDirectory, {
+    DownloadQualityOption? qualityOption,
+  }) async {
     final plugin = DownloaderPluginRegistry.instance.findPlugin(url);
     final metadata = await plugin.getMetadata(url);
     
@@ -32,8 +36,12 @@ class DownloadEngine {
       savePath: savePath,
       status: DownloadStatus.queued,
       progress: 0.0,
-      totalBytes: metadata.totalBytes,
+      totalBytes: qualityOption != null && qualityOption.sizeInBytes > 0
+          ? qualityOption.sizeInBytes
+          : metadata.totalBytes,
       downloadedBytes: 0,
+      selectedQualityId: qualityOption?.id,
+      selectedQualityLabel: qualityOption?.label,
       createdAt: DateTime.now(),
     );
 

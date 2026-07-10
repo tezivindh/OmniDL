@@ -74,6 +74,28 @@ class HttpDownloadPlugin implements DownloadPlugin {
   }
 
   @override
+  Future<List<DownloadQualityOption>> getQualityOptions(String url) async {
+    try {
+      final metadata = await getMetadata(url);
+      return [
+        DownloadQualityOption(
+          id: 'default',
+          label: 'Default (${metadata.ext.toUpperCase()})',
+          sizeInBytes: metadata.totalBytes,
+        ),
+      ];
+    } catch (_) {
+      return [
+        DownloadQualityOption(
+          id: 'default',
+          label: 'Default',
+          sizeInBytes: -1,
+        ),
+      ];
+    }
+  }
+
+  @override
   Stream<DownloadStatusUpdate> download(
     DownloadTask task, {
     required String saveDirectory,

@@ -84,6 +84,24 @@ class DownloadItemWidget extends ConsumerWidget {
                           fontSize: 14,
                         ),
                       ),
+                      if (task.selectedQualityLabel != null) ...[
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: colorScheme.secondaryContainer,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            task.selectedQualityLabel!,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: colorScheme.onSecondaryContainer,
+                            ),
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 2),
                       Text(
                         task.url,

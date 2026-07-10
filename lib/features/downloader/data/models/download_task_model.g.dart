@@ -42,24 +42,34 @@ const DownloadTaskModelSchema = CollectionSchema(
       name: r'savePath',
       type: IsarType.string,
     ),
-    r'status': PropertySchema(
+    r'selectedQualityId': PropertySchema(
       id: 5,
+      name: r'selectedQualityId',
+      type: IsarType.string,
+    ),
+    r'selectedQualityLabel': PropertySchema(
+      id: 6,
+      name: r'selectedQualityLabel',
+      type: IsarType.string,
+    ),
+    r'status': PropertySchema(
+      id: 7,
       name: r'status',
       type: IsarType.byte,
       enumMap: _DownloadTaskModelstatusEnumValueMap,
     ),
     r'title': PropertySchema(
-      id: 6,
+      id: 8,
       name: r'title',
       type: IsarType.string,
     ),
     r'totalBytes': PropertySchema(
-      id: 7,
+      id: 9,
       name: r'totalBytes',
       type: IsarType.long,
     ),
     r'url': PropertySchema(
-      id: 8,
+      id: 10,
       name: r'url',
       type: IsarType.string,
     )
@@ -91,6 +101,18 @@ int _downloadTaskModelEstimateSize(
     }
   }
   bytesCount += 3 + object.savePath.length * 3;
+  {
+    final value = object.selectedQualityId;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.selectedQualityLabel;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.title.length * 3;
   bytesCount += 3 + object.url.length * 3;
   return bytesCount;
@@ -107,10 +129,12 @@ void _downloadTaskModelSerialize(
   writer.writeString(offsets[2], object.errorMessage);
   writer.writeDouble(offsets[3], object.progress);
   writer.writeString(offsets[4], object.savePath);
-  writer.writeByte(offsets[5], object.status.index);
-  writer.writeString(offsets[6], object.title);
-  writer.writeLong(offsets[7], object.totalBytes);
-  writer.writeString(offsets[8], object.url);
+  writer.writeString(offsets[5], object.selectedQualityId);
+  writer.writeString(offsets[6], object.selectedQualityLabel);
+  writer.writeByte(offsets[7], object.status.index);
+  writer.writeString(offsets[8], object.title);
+  writer.writeLong(offsets[9], object.totalBytes);
+  writer.writeString(offsets[10], object.url);
 }
 
 DownloadTaskModel _downloadTaskModelDeserialize(
@@ -126,12 +150,14 @@ DownloadTaskModel _downloadTaskModelDeserialize(
   object.id = id;
   object.progress = reader.readDouble(offsets[3]);
   object.savePath = reader.readString(offsets[4]);
+  object.selectedQualityId = reader.readStringOrNull(offsets[5]);
+  object.selectedQualityLabel = reader.readStringOrNull(offsets[6]);
   object.status =
-      _DownloadTaskModelstatusValueEnumMap[reader.readByteOrNull(offsets[5])] ??
+      _DownloadTaskModelstatusValueEnumMap[reader.readByteOrNull(offsets[7])] ??
           DownloadStatus.queued;
-  object.title = reader.readString(offsets[6]);
-  object.totalBytes = reader.readLong(offsets[7]);
-  object.url = reader.readString(offsets[8]);
+  object.title = reader.readString(offsets[8]);
+  object.totalBytes = reader.readLong(offsets[9]);
+  object.url = reader.readString(offsets[10]);
   return object;
 }
 
@@ -153,14 +179,18 @@ P _downloadTaskModelDeserializeProp<P>(
     case 4:
       return (reader.readString(offset)) as P;
     case 5:
+      return (reader.readStringOrNull(offset)) as P;
+    case 6:
+      return (reader.readStringOrNull(offset)) as P;
+    case 7:
       return (_DownloadTaskModelstatusValueEnumMap[
               reader.readByteOrNull(offset)] ??
           DownloadStatus.queued) as P;
-    case 6:
-      return (reader.readString(offset)) as P;
-    case 7:
-      return (reader.readLong(offset)) as P;
     case 8:
+      return (reader.readString(offset)) as P;
+    case 9:
+      return (reader.readLong(offset)) as P;
+    case 10:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -805,6 +835,314 @@ extension DownloadTaskModelQueryFilter
   }
 
   QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterFilterCondition>
+      selectedQualityIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'selectedQualityId',
+      ));
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterFilterCondition>
+      selectedQualityIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'selectedQualityId',
+      ));
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterFilterCondition>
+      selectedQualityIdEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'selectedQualityId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterFilterCondition>
+      selectedQualityIdGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'selectedQualityId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterFilterCondition>
+      selectedQualityIdLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'selectedQualityId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterFilterCondition>
+      selectedQualityIdBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'selectedQualityId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterFilterCondition>
+      selectedQualityIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'selectedQualityId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterFilterCondition>
+      selectedQualityIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'selectedQualityId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterFilterCondition>
+      selectedQualityIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'selectedQualityId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterFilterCondition>
+      selectedQualityIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'selectedQualityId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterFilterCondition>
+      selectedQualityIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'selectedQualityId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterFilterCondition>
+      selectedQualityIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'selectedQualityId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterFilterCondition>
+      selectedQualityLabelIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'selectedQualityLabel',
+      ));
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterFilterCondition>
+      selectedQualityLabelIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'selectedQualityLabel',
+      ));
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterFilterCondition>
+      selectedQualityLabelEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'selectedQualityLabel',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterFilterCondition>
+      selectedQualityLabelGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'selectedQualityLabel',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterFilterCondition>
+      selectedQualityLabelLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'selectedQualityLabel',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterFilterCondition>
+      selectedQualityLabelBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'selectedQualityLabel',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterFilterCondition>
+      selectedQualityLabelStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'selectedQualityLabel',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterFilterCondition>
+      selectedQualityLabelEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'selectedQualityLabel',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterFilterCondition>
+      selectedQualityLabelContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'selectedQualityLabel',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterFilterCondition>
+      selectedQualityLabelMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'selectedQualityLabel',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterFilterCondition>
+      selectedQualityLabelIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'selectedQualityLabel',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterFilterCondition>
+      selectedQualityLabelIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'selectedQualityLabel',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterFilterCondition>
       statusEqualTo(DownloadStatus value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -1268,6 +1606,34 @@ extension DownloadTaskModelQuerySortBy
   }
 
   QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterSortBy>
+      sortBySelectedQualityId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'selectedQualityId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterSortBy>
+      sortBySelectedQualityIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'selectedQualityId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterSortBy>
+      sortBySelectedQualityLabel() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'selectedQualityLabel', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterSortBy>
+      sortBySelectedQualityLabelDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'selectedQualityLabel', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterSortBy>
       sortByStatus() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'status', Sort.asc);
@@ -1409,6 +1775,34 @@ extension DownloadTaskModelQuerySortThenBy
   }
 
   QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterSortBy>
+      thenBySelectedQualityId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'selectedQualityId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterSortBy>
+      thenBySelectedQualityIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'selectedQualityId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterSortBy>
+      thenBySelectedQualityLabel() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'selectedQualityLabel', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterSortBy>
+      thenBySelectedQualityLabelDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'selectedQualityLabel', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QAfterSortBy>
       thenByStatus() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'status', Sort.asc);
@@ -1502,6 +1896,22 @@ extension DownloadTaskModelQueryWhereDistinct
   }
 
   QueryBuilder<DownloadTaskModel, DownloadTaskModel, QDistinct>
+      distinctBySelectedQualityId({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'selectedQualityId',
+          caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QDistinct>
+      distinctBySelectedQualityLabel({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'selectedQualityLabel',
+          caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, DownloadTaskModel, QDistinct>
       distinctByStatus() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'status');
@@ -1568,6 +1978,20 @@ extension DownloadTaskModelQueryProperty
   QueryBuilder<DownloadTaskModel, String, QQueryOperations> savePathProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'savePath');
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, String?, QQueryOperations>
+      selectedQualityIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'selectedQualityId');
+    });
+  }
+
+  QueryBuilder<DownloadTaskModel, String?, QQueryOperations>
+      selectedQualityLabelProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'selectedQualityLabel');
     });
   }
 

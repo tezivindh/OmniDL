@@ -13,6 +13,18 @@ class DownloadMetadata {
   });
 }
 
+class DownloadQualityOption {
+  final String id;
+  final String label;
+  final int sizeInBytes;
+
+  DownloadQualityOption({
+    required this.id,
+    required this.label,
+    required this.sizeInBytes,
+  });
+}
+
 class DownloadStatusUpdate {
   final int downloadedBytes;
   final int totalBytes;
@@ -35,6 +47,9 @@ abstract class DownloadPlugin {
 
   /// Fetch remote media information without starting the download.
   Future<DownloadMetadata> getMetadata(String url);
+
+  /// Fetch available stream quality options for the given URL.
+  Future<List<DownloadQualityOption>> getQualityOptions(String url);
 
   /// Perform the download and return a stream of progress updates.
   /// The stream should emit updates on byte chunks and handle pause/cancel signals.

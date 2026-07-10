@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:omnidl/features/downloader/presentation/providers/download_providers.dart';
 import 'package:omnidl/features/downloader/presentation/widgets/download_item_widget.dart';
+import 'package:omnidl/features/downloader/presentation/widgets/quality_selector_bottom_sheet.dart';
 import 'package:path_provider/path_provider.dart';
 
 class HomeView extends ConsumerStatefulWidget {
@@ -43,8 +44,18 @@ class _HomeViewState extends ConsumerState<HomeView> {
       
       final saveDir = dir.path;
       
+      if (!mounted) return;
+      
+      // Show quality selector bottom sheet
+      final selectedQuality = await QualitySelectorBottomSheet.show(context, url);
+      if (selectedQuality == null) return; // User cancelled
+      
       // Enqueue download via engine
-      await ref.read(downloadEngineProvider).enqueue(url, saveDir);
+      await ref.read(downloadEngineProvider).enqueue(
+            url,
+            saveDir,
+            qualityOption: selectedQuality,
+          );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

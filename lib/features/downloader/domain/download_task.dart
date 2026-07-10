@@ -10,6 +10,8 @@ class DownloadTask {
   final int totalBytes;
   final int downloadedBytes;
   final String? errorMessage;
+  final String? selectedQualityId;
+  final String? selectedQualityLabel;
   final DateTime createdAt;
 
   DownloadTask({
@@ -22,6 +24,8 @@ class DownloadTask {
     required this.totalBytes,
     required this.downloadedBytes,
     this.errorMessage,
+    this.selectedQualityId,
+    this.selectedQualityLabel,
     required this.createdAt,
   });
 
@@ -35,6 +39,8 @@ class DownloadTask {
     int? totalBytes,
     int? downloadedBytes,
     String? errorMessage,
+    String? selectedQualityId,
+    String? selectedQualityLabel,
     DateTime? createdAt,
   }) {
     return DownloadTask(
@@ -47,6 +53,8 @@ class DownloadTask {
       totalBytes: totalBytes ?? this.totalBytes,
       downloadedBytes: downloadedBytes ?? this.downloadedBytes,
       errorMessage: errorMessage ?? this.errorMessage,
+      selectedQualityId: selectedQualityId ?? this.selectedQualityId,
+      selectedQualityLabel: selectedQualityLabel ?? this.selectedQualityLabel,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -63,6 +71,8 @@ class DownloadTask {
       ..totalBytes = totalBytes
       ..downloadedBytes = downloadedBytes
       ..errorMessage = errorMessage
+      ..selectedQualityId = selectedQualityId
+      ..selectedQualityLabel = selectedQualityLabel
       ..createdAt = createdAt;
   }
 
@@ -77,6 +87,8 @@ class DownloadTask {
       totalBytes: model.totalBytes,
       downloadedBytes: model.downloadedBytes,
       errorMessage: model.errorMessage,
+      selectedQualityId: model.selectedQualityId,
+      selectedQualityLabel: model.selectedQualityLabel,
       createdAt: model.createdAt,
     );
   }

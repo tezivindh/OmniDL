@@ -22,7 +22,6 @@ class YoutubeDownloadPlugin implements DownloadPlugin {
       final manifest = await yt.videos.streamsClient.getManifest(url);
       final streamInfo = manifest.muxed.withHighestBitrate();
       
-      // Clean video title to remove emojis and special characters for file paths
       final cleanTitle = video.title.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
       final ext = streamInfo.container.name;
       final size = streamInfo.size.totalBytes;
@@ -32,6 +31,61 @@ class YoutubeDownloadPlugin implements DownloadPlugin {
         totalBytes: size,
         ext: ext,
       );
+    } finally {
+      yt.close();
+    }
+  }
+
+  @override
+  Future<List<DownloadQualityOption>> getQualityOptions(String url) async {
+    final yt = YoutubeExplode();
+    try {
+      final manifest = await yt.videos.streamsClient.getManifest(url);
+      final List<DownloadQualityOption> options = [];
+
+      // Add Muxed Video streams (video + audio) sorted descending by resolution/bitrate
+      final muxedStreams = manifest.muxed.sortByVideoQuality();
+      for (final stream in muxedStreams) {
+        options.add(
+          DownloadQualityOption(
+            id: 'muxed_${stream.qualityLabel}',
+            label: 'Video - ${stream.qualityLabel} (${stream.container.name.toUpperCase()})',
+            sizeInBytes: stream.size.totalBytes,
+          ),
+        );
+      }
+
+      // Add highest audio-only stream if available
+      if (manifest.audioOnly.isNotEmpty) {
+        final bestAudio = manifest.audioOnly.withHighestBitrate();
+        options.add(
+          DownloadQualityOption(
+            id: 'audio_best',
+            label: 'Audio Only (${bestAudio.container.name.toUpperCase()})',
+            sizeInBytes: bestAudio.size.totalBytes,
+          ),
+        );
+      }
+
+      if (options.isEmpty) {
+        options.add(
+          DownloadQualityOption(
+            id: 'default',
+            label: 'Default Quality',
+            sizeInBytes: -1,
+          ),
+        );
+      }
+
+      return options;
+    } catch (_) {
+      return [
+        DownloadQualityOption(
+          id: 'default',
+          label: 'Default Quality',
+          sizeInBytes: -1,
+        ),
+      ];
     } finally {
       yt.close();
     }
@@ -76,7 +130,25 @@ class YoutubeDownloadPlugin implements DownloadPlugin {
       }
 
       final manifest = await yt.videos.streamsClient.getManifest(task.url);
-      final streamInfo = manifest.muxed.withHighestBitrate();
+      dynamic streamInfo;
+
+      if (task.selectedQualityId != null) {
+        if (task.selectedQualityId == 'audio_best') {
+          streamInfo = manifest.audioOnly.withHighestBitrate();
+        } else if (task.selectedQualityId!.startsWith('muxed_')) {
+          final qualityLabel = task.selectedQualityId!.replaceFirst('muxed_', '');
+          for (final s in manifest.muxed) {
+            if (s.qualityLabel == qualityLabel) {
+              streamInfo = s;
+              break;
+            }
+          }
+        }
+      }
+
+      // Fallback if quality option was not resolved/found
+      streamInfo ??= manifest.muxed.withHighestBitrate();
+
       final totalBytes = streamInfo.size.totalBytes;
 
       sink = file.openWrite(mode: FileMode.write);

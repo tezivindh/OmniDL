@@ -25,14 +25,37 @@ class DownloadEngine {
     final plugin = DownloaderPluginRegistry.instance.findPlugin(url);
     final metadata = await plugin.getMetadata(url);
     
+    // Determine the target extension based on selection
+    String ext = metadata.ext;
+    if (qualityOption != null) {
+      final labelUpper = qualityOption.label.toUpperCase();
+      if (labelUpper.contains('(WEBM)')) {
+        ext = 'webm';
+      } else if (labelUpper.contains('(MP4)')) {
+        ext = 'mp4';
+      } else if (labelUpper.contains('(M4A)')) {
+        ext = 'm4a';
+      } else if (qualityOption.id.startsWith('audio_')) {
+        ext = 'm4a';
+      }
+    }
+
+    var finalTitle = metadata.title;
+    final dotIndex = finalTitle.lastIndexOf('.');
+    if (dotIndex != -1) {
+      finalTitle = '${finalTitle.substring(0, dotIndex)}.$ext';
+    } else {
+      finalTitle = '$finalTitle.$ext';
+    }
+
     // Ensure filename matches filesystem safety rules
-    final safeTitle = metadata.title.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
+    final safeTitle = finalTitle.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
     final savePath = '$saveDirectory/$safeTitle';
 
     final task = DownloadTask(
       id: 0, // Isar auto increment
       url: url,
-      title: metadata.title,
+      title: finalTitle,
       savePath: savePath,
       status: DownloadStatus.queued,
       progress: 0.0,
